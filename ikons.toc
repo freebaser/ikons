@@ -1,0 +1,23 @@
+## Interface: 30300
+
+## Title: ikons
+## Notes: Track important cds and auras
+## Author: freebaser
+## Version: 0.1
+## X-Website: http://github.com/freebaser/ikons
+## X-Category: Combat
+
+## SavedVariables: ikonsDB
+
+## LoadManagers: AddonLoader
+## X-LoadOn-Always: delayed
+## X-LoadOn-Slash: /ikons
+
+LibStub.lua
+tekKonfigAboutPanel.lua
+
+db.lua
+slash.lua
+events.lua
+
+ikons.lua
