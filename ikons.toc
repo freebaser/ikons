@@ -16,6 +16,7 @@
 LibStub.lua
 tekKonfigAboutPanel.lua
 
+cfg.lua
 db.lua
 slash.lua
 events.lua
