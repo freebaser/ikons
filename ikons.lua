@@ -35,6 +35,7 @@ local function UnregIcon(frame, name)
    end
 end
 
+local fmod = math.fmod
 local function OnUpdate()
    return function(self, elapsed)
 	     local duration = self.duration - elapsed
@@ -42,8 +43,23 @@ local function OnUpdate()
 		UnregIcon(self)
 		return
 	     end
-	     
+
+	     local min, sec = floor(duration / 60), fmod(duration, 60)
+	     if(min > 0) then
+		self.timer:SetFormattedText("%d:%02d", min, sec)
+	     elseif(sec < 10) then
+		self.timer:SetFormattedText("%.1f", sec)
+	     else
+		self.timer:SetFormattedText("%d", sec)
+	     end
+
 	     self.duration = duration
+	     
+	     local sb = self.sb
+	     local percent = duration / self.max
+	     
+	     sb:SetStatusBarColor(1 + (self.r - 1) * percent, self.g * percent, self.b * percent)
+	     sb:SetValue(duration)
 	  end
 end
 
@@ -93,30 +109,46 @@ local function CreateIcon(name)
    local frame = CreateFrame"Frame"
    frame:Hide()
    frame:SetParent(UIParent)
-   frame:SetSize(30, 30) -- Get Size
 
    frame.bg = CreateFrame("Frame")
    frame.bg:SetParent(frame)
    frame.bg:SetPoint("TOPLEFT", frame, "TOPLEFT", -4, 4)
-   frame.bg:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 4, -4)
+   frame.bg:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 5+4, -4)
    frame.bg:SetFrameStrata("LOW")
    frame.bg:SetBackdrop(backdrop)
    frame.bg:SetBackdropColor(0, 0, 0)
    frame.bg:SetBackdropBorderColor(0, 0, 0)
 
-   local cd = CreateFrame"Cooldown"
-   cd:SetParent(frame)
-   cd:SetAllPoints(frame)
-
-   local icon = cd:CreateTexture(nil, "OVERLAY")
+   local icon = frame:CreateTexture(nil, "OVERLAY")
    icon:SetAllPoints(frame)
    icon:SetTexCoord(.07, .93, .07, .93)
+
+   local sb = CreateFrame"StatusBar"
+   sb:SetParent(frame)
+   sb:SetPoint("LEFT", frame, "RIGHT", 1, 0)
+   sb:SetSize(4, 30) -- Get Size
+   sb:SetOrientation"VERTICAL"
+   sb:SetStatusBarTexture("Interface\\AddOns\\ikons\\media\\smooth")
    
+   local font, fontsize = GameFontNormal:GetFont()
+   local count = frame:CreateFontString(nil, "OVERLAY")
+   count:SetFont(font, fontsize, "OUTLINE")
+   count:SetShadowOffset(-1, 1)
+   count:SetTextColor(1, 1, 1)
+   count:SetPoint("TOPLEFT")
+  
+   local timer = frame:CreateFontString(nil, "OVERLAY")
+   timer:SetFont(font, 10, "OUTLINE")
+   timer:SetTextColor(1, 1, 1)
+   timer:SetPoint("BOTTOM")
+  
    frame:SetScript("OnUpdate", OnUpdate())
    
    frame.icon = icon
-   frame.cd = cd
+   frame.sb = sb
    frame.name = name
+   frame.count = count
+   frame.timer = timer
 
    CreateAnchor(frame, name)
    table.insert(ns.icons, frame)
@@ -132,9 +164,13 @@ local function GetIcons()
    end
 end
 
-local function RegIcon(name, startTime, seconds, icon)
+local function RegIcon(name, startTime, seconds, icon, count)
    local frame = findIcon(name)
-   if frame == nil or frame.update == false then return end
+   if frame == nil then return end
+   if count then
+      frame.count:SetText(count)
+   end
+   if frame.update == false then return end
 
    frame.update = false
 
@@ -142,8 +178,17 @@ local function RegIcon(name, startTime, seconds, icon)
    frame.duration = duration
    frame.max = seconds
 
+   frame.r = 0
+   frame.g = 1
+   frame.b = 0
+
+   local sb = frame.sb
+   sb:SetStatusBarColor(frame.r, frame.g, frame.b)
+   
+
    frame.icon:SetTexture(icon)
-   frame.cd:SetCooldown(startTime, seconds)
+   frame.sb:SetMinMaxValues(0, seconds)
+   frame.sb:SetValue(duration)
    frame:Show()
 end
 
@@ -167,7 +212,7 @@ function ns:UNIT_AURA()
 	 local dur = -(GetTime() - expires)
 	 local startTime = GetTime()
 	 if dur > 1.5 then
-	    RegIcon(aura, startTime, dur, icon) 
+	    RegIcon(aura, startTime, dur, icon, count) 
 	 end
       else
 	 UnregIcon(nil, aura)
