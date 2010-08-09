@@ -9,6 +9,13 @@ local backdrop = {
 
 ns.icons = {}
 
+local function getPoint(obj)
+   local point, relativeTo, relativePoint, xOffset, yOffset = obj:GetPoint()
+   return string.format(
+      '%s\\%s\\%d\\%d',
+      point, 'UIParent', xOffset, yOffset)
+end
+
 local function findIcon(name)
    for i=#(ns.icons), 1, -1 do
       if ns.icons[i].name == name then
@@ -50,6 +57,7 @@ do
 
    local OnDragStop = function(self)
 			 self:StopMovingOrSizing()
+			 ns.db[self:GetName()] = getPoint(self)
 		      end
 
    CreateAnchor = function(frame, name)
@@ -126,10 +134,7 @@ end
 
 local function RegIcon(name, startTime, seconds, icon)
    local frame = findIcon(name)
-   --print("call")
-
    if frame == nil or frame.update == false then return end
-   --print("actual")
 
    frame.update = false
 
@@ -170,6 +175,15 @@ function ns:UNIT_AURA()
    end
 end
 
+local function SetPos()
+   for k, frame in next, anchorPool do
+      if ns.db[frame:GetName()] then
+	 local point, parent, x, y = string.split('\\', ns.db[frame:GetName()])
+	 frame:SetPoint(point, parent, point, x, y)
+      end
+   end
+end
+
 ns:RegisterEvent("ADDON_LOADED")
 function ns:ADDON_LOADED(event, addon)
    if addon ~= myname then return end
@@ -187,6 +201,7 @@ function ns:PLAYER_LOGIN()
    self:RegisterEvent("PLAYER_LOGOUT")	
    
    GetIcons()
+   SetPos()
 
    self:UnregisterEvent("PLAYER_LOGIN")
    self.PLAYER_LOGIN = nil
