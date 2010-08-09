@@ -8,6 +8,7 @@ local backdrop = {
 }
 
 ns.icons = {}
+local db
 
 local function getPoint(obj)
    local point, relativeTo, relativePoint, xOffset, yOffset = obj:GetPoint()
@@ -56,9 +57,12 @@ local function OnUpdate()
 	     self.duration = duration
 	     
 	     local sb = self.sb
-	     local percent = duration / self.max
 	     
-	     sb:SetStatusBarColor(1 + (self.r - 1) * percent, self.g * percent, self.b * percent)
+	     if ns.cfg.statusbar.gradient then 
+		local percent = duration / self.max
+		sb:SetStatusBarColor(1 + (self.r - 1) * percent, self.g * percent, self.b * percent)
+	     end
+
 	     sb:SetValue(duration)
 	  end
 end
@@ -78,7 +82,7 @@ do
 
    CreateAnchor = function(frame, name)
 		     local anchor = CreateFrame("Frame", name.."ikon", UIParent)
-		     anchor:SetSize(30, 30)
+		     anchor:SetSize(ns.cfg.icon.size, ns.cfg.icon.size)
 		     anchor:SetPoint("CENTER")
 		     anchor:SetFrameStrata"TOOLTIP"
 		     anchor:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background";})
@@ -113,7 +117,7 @@ local function CreateIcon(name)
    frame.bg = CreateFrame("Frame")
    frame.bg:SetParent(frame)
    frame.bg:SetPoint("TOPLEFT", frame, "TOPLEFT", -4, 4)
-   frame.bg:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 5+4, -4)
+   frame.bg:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 5 + ns.cfg.statusbar.width, -4)
    frame.bg:SetFrameStrata("LOW")
    frame.bg:SetBackdrop(backdrop)
    frame.bg:SetBackdropColor(0, 0, 0)
@@ -126,9 +130,9 @@ local function CreateIcon(name)
    local sb = CreateFrame"StatusBar"
    sb:SetParent(frame)
    sb:SetPoint("LEFT", frame, "RIGHT", 1, 0)
-   sb:SetSize(4, 30) -- Get Size
-   sb:SetOrientation"VERTICAL"
-   sb:SetStatusBarTexture("Interface\\AddOns\\ikons\\media\\smooth")
+   sb:SetSize(ns.cfg.statusbar.width, ns.cfg.icon.size)
+   sb:SetOrientation(ns.cfg.statusbar.orientation)
+   sb:SetStatusBarTexture(ns.cfg.statusbar.texture)
    
    local font, fontsize = GameFontNormal:GetFont()
    local count = frame:CreateFontString(nil, "OVERLAY")
@@ -149,19 +153,12 @@ local function CreateIcon(name)
    frame.name = name
    frame.count = count
    frame.timer = timer
+   frame.r = ns.cfg.statusbar.r
+   frame.g = ns.cfg.statusbar.g
+   frame.b = ns.cfg.statusbar.b
 
    CreateAnchor(frame, name)
    table.insert(ns.icons, frame)
-end
-
-local function GetIcons()
-   for name, obj in pairs(ns.cfg.cds) do
-      CreateIcon(name)
-   end
-   
-   for auras, obj in pairs(ns.cfg.auras) do
-      CreateIcon(auras)
-   end
 end
 
 local function RegIcon(name, startTime, seconds, icon, count)
@@ -178,23 +175,18 @@ local function RegIcon(name, startTime, seconds, icon, count)
    frame.duration = duration
    frame.max = seconds
 
-   frame.r = 0
-   frame.g = 1
-   frame.b = 0
-
    local sb = frame.sb
    sb:SetStatusBarColor(frame.r, frame.g, frame.b)
-   
+   sb:SetMinMaxValues(0, seconds)
+   sb:SetValue(duration)
 
    frame.icon:SetTexture(icon)
-   frame.sb:SetMinMaxValues(0, seconds)
-   frame.sb:SetValue(duration)
    frame:Show()
 end
 
 ns:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 function ns:SPELL_UPDATE_COOLDOWN()
-   for name, obj in pairs(ns.cfg.cds) do
+   for name, obj in pairs(db.cds) do
       local startTime, duration, enabled = GetSpellCooldown(name)
 
       if(enabled == 1 and duration > 1.5) then
@@ -205,7 +197,7 @@ end
 
 ns:RegisterEvent("UNIT_AURA")
 function ns:UNIT_AURA()
-   for aura, obj in pairs(ns.cfg.auras) do 
+   for aura, obj in pairs(db.auras) do 
       local name ,_, icon, count,_, duration, expires, caster,_,_, spellID = UnitAura("player", aura, nil, "HELPFUL")
 
       if name then
@@ -217,6 +209,16 @@ function ns:UNIT_AURA()
       else
 	 UnregIcon(nil, aura)
       end
+   end
+end
+
+local function GetIcons(db)
+   for name, obj in pairs(db.cds) do
+      CreateIcon(name)
+   end
+   
+   for auras, obj in pairs(db.auras) do
+      CreateIcon(auras)
    end
 end
 
@@ -244,9 +246,17 @@ end
 
 function ns:PLAYER_LOGIN()
    self:RegisterEvent("PLAYER_LOGOUT")	
-   
-   GetIcons()
-   SetPos()
+   local _, class = UnitClass("player")
+
+   db = ns.cfg[class] or nil
+
+   if db then
+      GetIcons(db)
+      SetPos()
+   else
+      ns:UnregisterEvent("SPELL_UPDATE_COOLDOWN")
+      ns:UnregisterEvent("UNIT_AURA")
+   end
 
    self:UnregisterEvent("PLAYER_LOGIN")
    self.PLAYER_LOGIN = nil
