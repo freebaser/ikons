@@ -8,7 +8,7 @@ local backdrop = {
 }
 
 ns.icons = {}
-local db
+local db, cds, auras, debuffs
 
 local function getPoint(obj)
    local point, relativeTo, relativePoint, xOffset, yOffset = obj:GetPoint()
@@ -29,7 +29,6 @@ end
 local function UnregIcon(frame, name)
    if frame then
       frame:Hide()
-      frame.update = true
    elseif name then
       local f = findIcon(name)
       return UnregIcon(f)
@@ -139,7 +138,7 @@ local function CreateIcon(name)
    count:SetFont(font, fontsize, "OUTLINE")
    count:SetShadowOffset(-1, 1)
    count:SetTextColor(1, 1, 1)
-   count:SetPoint("TOPLEFT")
+   count:SetPoint("TOPRIGHT")
   
    local timer = frame:CreateFontString(nil, "OVERLAY")
    timer:SetFont(font, 10, "OUTLINE")
@@ -164,12 +163,10 @@ end
 local function RegIcon(name, startTime, seconds, icon, count)
    local frame = findIcon(name)
    if frame == nil then return end
-   if count then
+   if count and count > 0 then
       frame.count:SetText(count)
    end
-   if frame.update == false then return end
-
-   frame.update = false
+   if frame.duration and seconds < frame.duration+0.5 then return end
 
    local duration = startTime - GetTime() + seconds
    frame.duration = duration
@@ -186,39 +183,55 @@ end
 
 ns:RegisterEvent("SPELL_UPDATE_COOLDOWN")
 function ns:SPELL_UPDATE_COOLDOWN()
-   for name, obj in pairs(db.cds) do
+   for name, obj in pairs(cds) do
       local startTime, duration, enabled = GetSpellCooldown(name)
-
+      
       if(enabled == 1 and duration > 1.5) then
 	 RegIcon(name, startTime, duration, GetSpellTexture(name))
       end
    end
 end
 
+ns:RegisterEvent("PLAYER_TARGET_CHANGED")
 ns:RegisterEvent("UNIT_AURA")
 function ns:UNIT_AURA()
-   for aura, obj in pairs(db.auras) do 
+   for aura, obj in pairs(auras) do 
       local name ,_, icon, count,_, duration, expires, caster,_,_, spellID = UnitAura("player", aura, nil, "HELPFUL")
 
       if name then
-	 local dur = -(GetTime() - expires)
 	 local startTime = GetTime()
-	 if dur > 1.5 then
-	    RegIcon(aura, startTime, dur, icon, count) 
-	 end
+	 local dur = -(GetTime() - expires)
+	 RegIcon(name, startTime, dur, icon, count)
       else
 	 UnregIcon(nil, aura)
       end
    end
-end
 
-local function GetIcons(db)
-   for name, obj in pairs(db.cds) do
-      CreateIcon(name)
+   for debuff, obj in pairs(debuffs) do 
+      local name ,_, icon, count,_, duration, expires, caster,_,_, spellID = UnitAura("target", debuff, nil, "HARMFUL")
+
+      if name then
+	 local startTime = GetTime()
+	 local dur = -(GetTime() - expires)
+	 RegIcon(name, startTime, dur, icon, count)
+      else
+	 UnregIcon(nil, debuff)
+      end
+   end
+end
+ns.PLAYER_TARGET_CHANGED = ns.UNIT_AURA
+
+local function GetIcons()
+   for cd, obj in pairs(cds) do
+      CreateIcon(cd)
    end
    
-   for auras, obj in pairs(db.auras) do
-      CreateIcon(auras)
+   for aura, obj in pairs(auras) do
+      CreateIcon(aura)
+   end
+
+   for debuff, obj in pairs(debuffs) do
+      CreateIcon(debuff)
    end
 end
 
@@ -251,11 +264,16 @@ function ns:PLAYER_LOGIN()
    db = ns.cfg[class] or nil
 
    if db then
-      GetIcons(db)
+      cds = db.cds or {}
+      auras = db.auras or {}
+      debuffs = db.debuffs or {}
+
+      GetIcons()
       SetPos()
    else
       ns:UnregisterEvent("SPELL_UPDATE_COOLDOWN")
       ns:UnregisterEvent("UNIT_AURA")
+      ns:UnregisterEvent("PLAYER_TARGET_CHANGED")
    end
 
    self:UnregisterEvent("PLAYER_LOGIN")

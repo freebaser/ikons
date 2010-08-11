@@ -19,11 +19,15 @@ ns.cfg = {
       cds = {
 	 ["Bloodthirst"] = true,
 	 ["Whirlwind"] = true,
-
       },
 
       auras = {
 	 ["Slam!"] = true,
+      },
+
+      debuffs = {
+	 ["Rend"] = true,
+	 ["Sunder Armor"] = true,
       },
    },
 
