@@ -29,6 +29,7 @@ end
 local function UnregIcon(frame, name)
    if frame then
       frame:Hide()
+      frame.update = true
    elseif name then
       local f = findIcon(name)
       return UnregIcon(f)
@@ -160,21 +161,24 @@ local function CreateIcon(name)
    table.insert(ns.icons, frame)
 end
 
-local function RegIcon(name, startTime, seconds, icon, count)
+local function RegIcon(name, startTime, seconds, dura, icon, count, max)
    local frame = findIcon(name)
    if frame == nil then return end
    if count and count > 0 then
       frame.count:SetText(count)
    end
-   if frame.duration and seconds < frame.duration+0.5 then return end
+   if frame.update == false then
+      if frame.duration and seconds < frame.duration+0.5 then return end
+   end
+   frame.update = false
 
    local duration = startTime - GetTime() + seconds
    frame.duration = duration
-   frame.max = seconds
+   frame.max = dura
 
    local sb = frame.sb
    sb:SetStatusBarColor(frame.r, frame.g, frame.b)
-   sb:SetMinMaxValues(0, seconds)
+   sb:SetMinMaxValues(0, dura)
    sb:SetValue(duration)
 
    frame.icon:SetTexture(icon)
@@ -187,7 +191,7 @@ function ns:SPELL_UPDATE_COOLDOWN()
       local startTime, duration, enabled = GetSpellCooldown(name)
       
       if(enabled == 1 and duration > 1.5) then
-	 RegIcon(name, startTime, duration, GetSpellTexture(name))
+	 RegIcon(name, startTime, duration, duration, GetSpellTexture(name))
       end
    end
 end
@@ -200,8 +204,8 @@ function ns:UNIT_AURA()
 
       if name then
 	 local startTime = GetTime()
-	 local dur = -(GetTime() - expires)
-	 RegIcon(name, startTime, dur, icon, count)
+	 local secs = -(GetTime() - expires)
+	 RegIcon(name, startTime, secs, duration, icon, count)
       else
 	 UnregIcon(nil, aura)
       end
@@ -213,8 +217,8 @@ function ns:UNIT_AURA()
       if name then
 	 if((not debuff.player) or (debuff.player and caster == "player")) then
 	    local startTime = GetTime()
-	    local dur = -(GetTime() - expires)
-	    RegIcon(name, startTime, dur, icon, count)
+	    local secs = -(GetTime() - expires)
+	    RegIcon(name, startTime, secs, duration, icon, count)
 	 end
       else
 	 UnregIcon(nil, debuff)
