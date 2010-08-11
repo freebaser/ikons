@@ -211,9 +211,11 @@ function ns:UNIT_AURA()
       local name ,_, icon, count,_, duration, expires, caster,_,_, spellID = UnitAura("target", debuff, nil, "HARMFUL")
 
       if name then
-	 local startTime = GetTime()
-	 local dur = -(GetTime() - expires)
-	 RegIcon(name, startTime, dur, icon, count)
+	 if((not debuff.player) or (debuff.player and caster == "player")) then
+	    local startTime = GetTime()
+	    local dur = -(GetTime() - expires)
+	    RegIcon(name, startTime, dur, icon, count)
+	 end
       else
 	 UnregIcon(nil, debuff)
       end

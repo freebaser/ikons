@@ -26,7 +26,7 @@ ns.cfg = {
       },
 
       debuffs = {
-	 ["Rend"] = true,
+	 ["Rend"] = { player = true },
 	 ["Sunder Armor"] = true,
       },
    },
