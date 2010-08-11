@@ -1,1 +1,8 @@
-ikons - track important cds and auras.
+h5. ikons - track important cds and auras.
+
+@/ikons@ to unlock anchors.
+edit cfg.lua to add cds, player buffs and target debuffs.
+
+_Credits_: 
+freebaser - Author
+haste (oCD - http://github.com/haste/oCD)

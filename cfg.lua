@@ -33,11 +33,13 @@ ns.cfg = {
 
    ["PRIEST"] = {
       cds = {
-	 ["Penance"] = true, 
+	 ["Penance"] = true,
+	 ["Circle of Healing"] = true,
+	 ["Prayer of Mending"] = true,
       },
 
       auras = {
-	 
+	 ["Surge of Light"] = true,
       },
    },
 }

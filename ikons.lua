@@ -9,6 +9,7 @@ local backdrop = {
 
 ns.icons = {}
 local db, cds, auras, debuffs
+local gradient = ns.cfg.statusbar.gradient
 
 local function getPoint(obj)
    local point, relativeTo, relativePoint, xOffset, yOffset = obj:GetPoint()
@@ -58,7 +59,7 @@ local function OnUpdate()
 	     
 	     local sb = self.sb
 	     
-	     if ns.cfg.statusbar.gradient then 
+	     if gradient then 
 		local percent = duration / self.max
 		sb:SetStatusBarColor(1 + (self.r - 1) * percent, self.g * percent, self.b * percent)
 	     end
@@ -102,7 +103,7 @@ do
 		     anchor.name:SetJustifyH"CENTER"
 		     anchor.name:SetFont(GameFontNormal:GetFont(), 12)
 		     anchor.name:SetTextColor(1, 1, 1)
-		     anchor.name:SetText(name)
+		     anchor.name:SetText(name:sub(0, 5))
 		     table.insert(anchorPool, anchor)
 		     
 		     frame:SetAllPoints(anchor)
@@ -137,7 +138,6 @@ local function CreateIcon(name)
    local font, fontsize = GameFontNormal:GetFont()
    local count = frame:CreateFontString(nil, "OVERLAY")
    count:SetFont(font, fontsize, "OUTLINE")
-   count:SetShadowOffset(-1, 1)
    count:SetTextColor(1, 1, 1)
    count:SetPoint("TOPRIGHT")
   
@@ -161,7 +161,7 @@ local function CreateIcon(name)
    table.insert(ns.icons, frame)
 end
 
-local function RegIcon(name, startTime, seconds, dura, icon, count, max)
+local function RegIcon(name, startTime, seconds, dura, icon, count)
    local frame = findIcon(name)
    if frame == nil then return end
    if count and count > 0 then
