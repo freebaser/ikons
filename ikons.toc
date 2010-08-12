@@ -3,7 +3,7 @@
 ## Title: ikons
 ## Notes: Track important cds and auras
 ## Author: freebaser
-## Version: 0.1
+## Version: 0.2
 ## X-Website: http://github.com/freebaser/ikons
 ## X-Category: Combat
 

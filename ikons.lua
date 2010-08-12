@@ -10,6 +10,7 @@ local backdrop = {
 ns.icons = {}
 local db, cds, auras, debuffs
 local gradient = ns.cfg.statusbar.gradient
+local CD, AURA, DEBUFF = "CD", "AURA", "DEBUFF"
 
 local function getPoint(obj)
    local point, relativeTo, relativePoint, xOffset, yOffset = obj:GetPoint()
@@ -18,21 +19,21 @@ local function getPoint(obj)
       point, 'UIParent', xOffset, yOffset)
 end
 
-local function findIcon(name)
+local function findIcon(name, type)
    for i=#(ns.icons), 1, -1 do
-      if ns.icons[i].name == name then
+      if ns.icons[i].name == name and ns.icons[i].type == type then
 	 local frame = ns.icons[i]
 	 return frame
       end
    end   
 end
 
-local function UnregIcon(frame, name)
+local function UnregIcon(frame, name, type)
    if frame then
       frame:Hide()
       frame.update = true
    elseif name then
-      local f = findIcon(name)
+      local f = findIcon(name, type)
       return UnregIcon(f)
    end
 end
@@ -81,8 +82,8 @@ do
 			 ns.db[self:GetName()] = getPoint(self)
 		      end
 
-   CreateAnchor = function(frame, name)
-		     local anchor = CreateFrame("Frame", name.."ikon", UIParent)
+   CreateAnchor = function(frame, name, type)
+		     local anchor = CreateFrame("Frame", name..type.."ikon", UIParent)
 		     anchor:SetSize(ns.cfg.icon.size, ns.cfg.icon.size)
 		     anchor:SetPoint("CENTER")
 		     anchor:SetFrameStrata"TOOLTIP"
@@ -104,13 +105,20 @@ do
 		     anchor.name:SetFont(GameFontNormal:GetFont(), 12)
 		     anchor.name:SetTextColor(1, 1, 1)
 		     anchor.name:SetText(name:sub(0, 5))
+
+		     anchor.type = anchor:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+		     anchor.type:SetPoint"BOTTOM"
+		     anchor.type:SetJustifyH"CENTER"
+		     anchor.type:SetFont(GameFontNormal:GetFont(), 10)
+		     anchor.type:SetTextColor(1, 1, 1)
+		     anchor.type:SetText(type)
 		     table.insert(anchorPool, anchor)
 		     
 		     frame:SetAllPoints(anchor)
 		  end
 end
 
-local function CreateIcon(name)
+local function CreateIcon(name, type)
    local frame = CreateFrame"Frame"
    frame:Hide()
    frame:SetParent(UIParent)
@@ -151,18 +159,19 @@ local function CreateIcon(name)
    frame.icon = icon
    frame.sb = sb
    frame.name = name
+   frame.type = type
    frame.count = count
    frame.timer = timer
    frame.r = ns.cfg.statusbar.r
    frame.g = ns.cfg.statusbar.g
    frame.b = ns.cfg.statusbar.b
 
-   CreateAnchor(frame, name)
+   CreateAnchor(frame, name, type)
    table.insert(ns.icons, frame)
 end
 
-local function RegIcon(name, startTime, seconds, dura, icon, count)
-   local frame = findIcon(name)
+local function RegIcon(name, startTime, seconds, dura, icon, count, type)
+   local frame = findIcon(name, type)
    if frame == nil then return end
    if count and count > 0 then
       frame.count:SetText(count)
@@ -191,7 +200,7 @@ function ns:SPELL_UPDATE_COOLDOWN()
       local startTime, duration, enabled = GetSpellCooldown(name)
       
       if(enabled == 1 and duration > 1.5) then
-	 RegIcon(name, startTime, duration, duration, GetSpellTexture(name))
+	 RegIcon(name, startTime, duration, duration, GetSpellTexture(name), nil, CD)
       end
    end
 end
@@ -205,9 +214,9 @@ function ns:UNIT_AURA()
       if name then
 	 local startTime = GetTime()
 	 local secs = -(GetTime() - expires)
-	 RegIcon(name, startTime, secs, duration, icon, count)
+	 RegIcon(name, startTime, secs, duration, icon, count, AURA)
       else
-	 UnregIcon(nil, aura)
+	 UnregIcon(nil, aura, AURA)
       end
    end
 
@@ -218,10 +227,10 @@ function ns:UNIT_AURA()
 	 if((not debuff.player) or (debuff.player and caster == "player")) then
 	    local startTime = GetTime()
 	    local secs = -(GetTime() - expires)
-	    RegIcon(name, startTime, secs, duration, icon, count)
+	    RegIcon(name, startTime, secs, duration, icon, count, DEBUFF)
 	 end
       else
-	 UnregIcon(nil, debuff)
+	 UnregIcon(nil, debuff, DEBUFF)
       end
    end
 end
@@ -229,15 +238,15 @@ ns.PLAYER_TARGET_CHANGED = ns.UNIT_AURA
 
 local function GetIcons()
    for cd, obj in pairs(cds) do
-      CreateIcon(cd)
+      CreateIcon(cd, CD)
    end
    
    for aura, obj in pairs(auras) do
-      CreateIcon(aura)
+      CreateIcon(aura, AURA)
    end
 
    for debuff, obj in pairs(debuffs) do
-      CreateIcon(debuff)
+      CreateIcon(debuff, DEBUFF)
    end
 end
 

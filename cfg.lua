@@ -42,4 +42,16 @@ ns.cfg = {
 	 ["Surge of Light"] = true,
       },
    },
+
+   ["DEATHKNIGHT"] = {
+      cds = {
+	 --["Icebound Fortitude"] = true,
+	 --["Vampiric Blood"] = true,
+      },
+      
+      auras = {
+	 ["Icebound Fortitude"] = true,
+	 ["Vampiric Blood"] = true,
+      },
+   },
 }
