@@ -8,9 +8,9 @@ local backdrop = {
 }
 
 ns.icons = {}
-local db, cds, auras, debuffs
+local db, cds, auras, debuffs, items
 local gradient = ns.cfg.statusbar.gradient
-local CD, AURA, DEBUFF = "CD", "AURA", "DEBUFF"
+local CD, AURA, DEBUFF, ITEM = "CD", "AURA", "DEBUFF", "ITEM"
 
 local function getPoint(obj)
    local point, relativeTo, relativePoint, xOffset, yOffset = obj:GetPoint()
@@ -236,6 +236,16 @@ function ns:UNIT_AURA()
 end
 ns.PLAYER_TARGET_CHANGED = ns.UNIT_AURA
 
+ns:RegisterEvent("BAG_UPDATE_COOLDOWN")
+function ns:BAG_UPDATE_COOLDOWN()
+   for item, obj in pairs(items) do
+      local startTime, duration, enabled = GetItemCooldown(item)
+      if(enabled == 1) then
+	 RegIcon(tostring(item), startTime, duration, duration, select(10, GetItemInfo(item)), nil, ITEM)
+      end
+   end
+end
+
 local function GetIcons()
    for cd, obj in pairs(cds) do
       CreateIcon(cd, CD)
@@ -247,6 +257,10 @@ local function GetIcons()
 
    for debuff, obj in pairs(debuffs) do
       CreateIcon(debuff, DEBUFF)
+   end
+
+   for item, obj in pairs(items) do
+      CreateIcon(tostring(item), ITEM)
    end
 end
 
@@ -282,6 +296,7 @@ function ns:PLAYER_LOGIN()
       cds = db.cds or {}
       auras = db.auras or {}
       debuffs = db.debuffs or {}
+      items = db.items or {}
 
       GetIcons()
       SetPos()
@@ -289,6 +304,7 @@ function ns:PLAYER_LOGIN()
       ns:UnregisterEvent("SPELL_UPDATE_COOLDOWN")
       ns:UnregisterEvent("UNIT_AURA")
       ns:UnregisterEvent("PLAYER_TARGET_CHANGED")
+      ns:UnregisterEvent("BAG_UPDATE_COOLDOWN")
    end
 
    self:UnregisterEvent("PLAYER_LOGIN")

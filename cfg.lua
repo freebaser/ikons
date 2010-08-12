@@ -29,6 +29,10 @@ ns.cfg = {
 	 ["Rend"] = { player = true },
 	 ["Sunder Armor"] = true,
       },
+
+      items = {
+	 --[50356] = true,
+      },
    },
 
    ["PRIEST"] = {
