@@ -58,8 +58,8 @@ local profile = {
       gradient = false,
       texture = "Interface\\AddOns\\ikons\\media\\smooth",
       r = 0,
-      g = 0,
-      b = 1,
+      g = .6,
+      b = .9,
       fontsize = 10,
    },
 

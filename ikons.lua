@@ -128,7 +128,7 @@ local function CreateIcon(name, obj, type)
    frame.bg:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", 5 + obj.width, -4)
    frame.bg:SetFrameStrata("LOW")
    frame.bg:SetBackdrop(backdrop)
-   frame.bg:SetBackdropColor(0, 0, 0)
+   frame.bg:SetBackdropColor(.05, .05, .05)
    frame.bg:SetBackdropBorderColor(0, 0, 0)
 
    local icon = frame:CreateTexture(nil, "OVERLAY")
@@ -145,26 +145,20 @@ local function CreateIcon(name, obj, type)
    local font = GameFontNormal:GetFont()
    local fontsize = obj.fontsize
    
+   local count = frame:CreateFontString(nil, "OVERLAY")
+   count:SetFont(font, fontsize, "OUTLINE")
+   count:SetTextColor(1, 1, 1)
+   
+   local timer = sb:CreateFontString(nil, "OVERLAY")
+   timer:SetFont(font, fontsize, "OUTLINE")
+   timer:SetTextColor(1, 1, 1)
+   
    if obj.orientation == "HORIZONTAL" then
-      local count = frame:CreateFontString(nil, "OVERLAY")
-      count:SetFont(font, fontsize, "OUTLINE")
-      count:SetTextColor(1, 1, 1)
       count:SetPoint("TOPRIGHT")
-      
-      local timer = sb:CreateFontString(nil, "OVERLAY")
-      timer:SetFont(font, fontsize, "OUTLINE")
-      timer:SetTextColor(1, 1, 1)
-      timer:SetPoint("RIGHT")
+      timer:SetPoint("RIGHT", sb)
    else
-      local count = frame:CreateFontString(nil, "OVERLAY")
-      count:SetFont(font, fontsize, "OUTLINE")
-      count:SetTextColor(1, 1, 1)
       count:SetPoint("TOPRIGHT")
-      
-      local timer = frame:CreateFontString(nil, "OVERLAY")
-      timer:SetFont(font, fontsize, "OUTLINE")
-      timer:SetTextColor(1, 1, 1)
-      timer:SetPoint("BOTTOM")
+      timer:SetPoint("BOTTOM", frame)
    end
   
    frame:SetScript("OnUpdate", OnUpdate())
