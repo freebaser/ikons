@@ -83,23 +83,27 @@ do
 
    CreateAnchor = function(frame)
 		     local anchor = CreateFrame("Frame", frame.name..frame.type.."ikon", UIParent)
-		     anchor:SetSize(frame.size, frame.size)
-		     anchor:SetPoint("CENTER")
-		     anchor:SetFrameStrata"TOOLTIP"
+		     anchor:SetFrameStrata"BACKGROUND"
 		     anchor:SetBackdrop({bgFile = "Interface\\Tooltips\\UI-Tooltip-Background";})
+		     anchor:SetBackdropBorderColor(0, .9, 0)
+		     anchor:SetBackdropColor(0, .9, 0)
+		     anchor:SetSize(frame.size+frame.width+4, frame.size+4)
+		     anchor:SetPoint("CENTER")
 		     anchor:EnableMouse(true)
 		     anchor:SetMovable(true)
 		     anchor:SetClampedToScreen(true)
 		     anchor:RegisterForDrag"LeftButton"
-		     anchor:SetBackdropBorderColor(0, .9, 0)
-		     anchor:SetBackdropColor(0, .9, 0)
 		     anchor:Hide()
 
 		     anchor:SetScript("OnDragStart", OnDragStart)
 		     anchor:SetScript("OnDragStop", OnDragStop)
 		
+		     anchor.icon = CreateFrame("Frame", nil, anchor)
+		     anchor.icon:SetPoint("LEFT", anchor, "LEFT", 1, 0)
+		     anchor.icon:SetSize(frame.size, frame.size)
+		     
 		     anchor.name = anchor:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-		     anchor.name:SetPoint"CENTER"
+		     anchor.name:SetPoint"TOP"
 		     anchor.name:SetJustifyH"CENTER"
 		     anchor.name:SetFont(GameFontNormal:GetFont(), 12)
 		     anchor.name:SetTextColor(1, 1, 1)
@@ -113,7 +117,7 @@ do
 		     anchor.type:SetText(frame.type)
 		     table.insert(anchorPool, anchor)
 		     
-		     frame:SetAllPoints(anchor)
+		     frame:SetAllPoints(anchor.icon)
 		  end
 end
 
@@ -174,6 +178,7 @@ local function CreateIcon(name, obj, type)
    frame.b = obj.b
    frame.gradient = obj.gradient
    frame.size = obj.size
+   frame.width = obj.width
 
    CreateAnchor(frame)
    table.insert(ns.icons, frame)

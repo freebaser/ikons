@@ -1,6 +1,16 @@
 local myname, ns = ...
 
+local group = {
+
+   -- Bloodthirst, Whirlwind, Slam!
+   ["BWS"] = {
+      growth = "UP",
+      spacing = 5,
+   },
+}
+
 local profile = {
+
    ["default"] = {
       size = 30,
       width = 4,
@@ -61,6 +71,7 @@ local profile = {
       g = .6,
       b = .9,
       fontsize = 10,
+      group = group["BWS"],
    },
 
    ["bt"] = {
@@ -73,6 +84,7 @@ local profile = {
       g = 0,
       b = 0,
       fontsize = 10,
+      group = group["BWS"]
    },
 
    ["slam"] = {
@@ -85,6 +97,7 @@ local profile = {
       g = .8,
       b = 0,
       fontsize = 10,
+      group = group["BWS"]
    },
 }
 
