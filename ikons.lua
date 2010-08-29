@@ -276,6 +276,8 @@ end
 local function SetPos()
    for k, frame in next, anchorPool do
       if ns.db[frame:GetName()] then
+	 frame:ClearAllPoints()
+
 	 local point, parent, x, y = string.split('\\', ns.db[frame:GetName()])
 	 frame:SetPoint(point, parent, point, x, y)
       end
