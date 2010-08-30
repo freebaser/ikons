@@ -1,13 +1,5 @@
-local myname, ns = ...
-
-local group = {
-
-   -- Bloodthirst, Whirlwind, Slam!
-   ["BWS"] = {
-      growth = "UP",
-      spacing = 5,
-   },
-}
+local myname, ns = . ..
+local tex1 = "Interface\\AddOns\\ikons\\media\\smooth"
 
 local profile = {
 
@@ -16,7 +8,7 @@ local profile = {
       width = 4,
       orientation = "VERTICAL",
       gradient = true,
-      texture = "Interface\\AddOns\\ikons\\media\\smooth",
+      texture = tex1,
       r = 0,
       g = 1,
       b = 0,
@@ -29,7 +21,7 @@ local profile = {
       width = 4,
       orientation = "VERTICAL",
       gradient = true,
-      texture = "Interface\\AddOns\\ikons\\media\\smooth",
+      texture = tex1,
       r = 0,
       g = 1,
       b = 0,
@@ -42,7 +34,7 @@ local profile = {
       width = 6,
       orientation = "VERTICAL",
       gradient = true,
-      texture = "Interface\\AddOns\\ikons\\media\\smooth",
+      texture = tex1,
       r = 0,
       g = 1,
       b = 0,
@@ -54,7 +46,7 @@ local profile = {
       width = 150,
       orientation = "HORIZONTAL",
       gradient = false,
-      texture = "Interface\\AddOns\\ikons\\media\\smooth",
+      texture = tex1,
       r = .8,
       g = .8,
       b = 0,
@@ -66,12 +58,11 @@ local profile = {
       width = 150,
       orientation = "HORIZONTAL",
       gradient = false,
-      texture = "Interface\\AddOns\\ikons\\media\\smooth",
+      texture = tex1,
       r = 0,
       g = .6,
       b = .9,
       fontsize = 10,
-      group = group["BWS"],
    },
 
    ["bt"] = {
@@ -79,12 +70,11 @@ local profile = {
       width = 150,
       orientation = "HORIZONTAL",
       gradient = false,
-      texture = "Interface\\AddOns\\ikons\\media\\smooth",
+      texture = tex1,
       r = 1,
       g = 0,
       b = 0,
       fontsize = 10,
-      group = group["BWS"]
    },
 
    ["slam"] = {
@@ -92,12 +82,11 @@ local profile = {
       width = 150,
       orientation = "HORIZONTAL",
       gradient = false,
-      texture = "Interface\\AddOns\\ikons\\media\\smooth",
+      texture = tex1,
       r = .8,
       g = .8,
       b = 0,
       fontsize = 10,
-      group = group["BWS"]
    },
 }
 
