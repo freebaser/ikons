@@ -1,4 +1,4 @@
-local myname, ns = . ..
+local myname, ns = ...
 local tex1 = "Interface\\AddOns\\ikons\\media\\smooth"
 
 local profile = {
